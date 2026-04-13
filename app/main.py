@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
 
 from app.core.database import Base, engine
 from app.routers import auth_router, deal_router
@@ -8,10 +9,13 @@ from app.routers import auth_router, deal_router
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Deal Management Service",
+    title="Локатор Билетов",
     description="Сервис управления сделками с авторизацией через VK ID",
     version="1.0.0"
 )
+
+# Настройка шаблонов
+templates = Jinja2Templates(directory="app/templates")
 
 # Настройка CORS
 app.add_middleware(
@@ -28,15 +32,11 @@ app.include_router(deal_router)
 
 
 @app.get("/")
-async def root():
+async def root(request: Request):
     """
-    Главная страница API
+    Главная страница сайта
     """
-    return {
-        "message": "Welcome to Deal Management Service API",
-        "docs": "/docs",
-        "redoc": "/redoc"
-    }
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/health")
